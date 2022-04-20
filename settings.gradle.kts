@@ -26,7 +26,7 @@ include(
     "macos",
     "linux",
     "linux/gtk",
-    "linux/xdg-desktop-portal"
+    "linux/xdg"
 )
 
 rootProject.name = "auto-dark-mode"
