@@ -27,7 +27,9 @@ import org.freedesktop.dbus.types.Variant
 
 
 class FreedesktopConnection {
+    // FIXME this is deprecated, but the new version below does not work somehow
     private val connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SESSION)
+    //private val connection = DBusConnectionBuilder.forSessionBus().build()
     private val freedesktopInterface: FreedesktopInterface = connection.getRemoteObject(
         "org.freedesktop.portal.Desktop",
         "/org/freedesktop/portal/desktop",

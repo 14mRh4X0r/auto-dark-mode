@@ -12,7 +12,8 @@ darklaf-nativeUtils = { module = "com.github.weisj:darklaf-native-utils", versio
 kotlinx-coroutines-core-jvm = {module ="org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm", version ="1.6.1"}
 
 # Linux frameworks
-linux-dbus = { module = "com.github.hypfvieh:dbus-java", version = "3.3.1" }
+linux-dbus-core = { module = "com.github.hypfvieh:dbus-java-core", version = "4.1.0" }
+linux-dbus-transport = { module = "com.github.hypfvieh:dbus-java-transport-jnr-unixsocket", version = "4.1.0" }
 
 # MacOS frameworks
 macos-appKit = { module = "dev.nokee.framework:AppKit", version.ref = "macOSFramework" }

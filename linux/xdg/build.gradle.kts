@@ -6,7 +6,8 @@ plugins {
 
 dependencies {
     implementation(projects.autoDarkModeBase)
-    implementation(libs.linux.dbus)
+    implementation(libs.linux.dbus.core)
+    implementation(libs.linux.dbus.transport)
     implementation(libs.kotlinx.coroutines.core.jvm)
 
     ksp(libs.autoservice.processor)
