@@ -21,6 +21,8 @@
 package com.github.weisj.darkmode.platform.linux.xdg
 
 import org.freedesktop.dbus.connections.impl.DBusConnection
+import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
+import org.freedesktop.dbus.exceptions.DBusException
 import org.freedesktop.dbus.interfaces.DBusSigHandler
 import org.freedesktop.dbus.types.UInt32
 import org.freedesktop.dbus.types.Variant
@@ -28,9 +30,18 @@ import org.freedesktop.dbus.types.Variant
 
 class FreedesktopConnection {
     // FIXME this is deprecated, but the new version below does not work somehow
-    private val connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SESSION)
-    //private val connection = DBusConnectionBuilder.forSessionBus().build()
-    private val freedesktopInterface: FreedesktopInterface = connection.getRemoteObject(
+//    private val connection = DBusConnection.getConnection(DBusConnection.DBusBusType.SESSION)
+    private val connection: DBusConnection? = try {
+        // Temporarily replace the current tread's contextClassLoader to work around dbus-java's naive service loading
+        val ccl = Thread.currentThread().contextClassLoader
+        Thread.currentThread().contextClassLoader = javaClass.classLoader
+        val conn = DBusConnectionBuilder.forSessionBus().build()
+        Thread.currentThread().contextClassLoader = ccl
+        conn
+    } catch (_: DBusException) {
+        null
+    }
+    private val freedesktopInterface: FreedesktopInterface? = connection?.getRemoteObject(
         "org.freedesktop.portal.Desktop",
         "/org/freedesktop/portal/desktop",
         FreedesktopInterface::class.java
@@ -38,25 +49,28 @@ class FreedesktopConnection {
 
     val theme: ThemeMode
         get() {
-            val theme = recursiveVariantValue(
-                freedesktopInterface.Read(
-                    FreedesktopInterface.APPEARANCE_NAMESPACE,
-                    FreedesktopInterface.COLOR_SCHEME_KEY
-                )
-            ) as UInt32
+            freedesktopInterface ?: return ThemeMode.ERROR
+
+            val theme = freedesktopInterface.runCatching {
+                recursiveVariantValue(
+                    Read(
+                        FreedesktopInterface.APPEARANCE_NAMESPACE,
+                        FreedesktopInterface.COLOR_SCHEME_KEY
+                    )
+                ) as UInt32
+            }.getOrElse { return ThemeMode.ERROR }
 
             return when (theme.toInt()) {
                 1 -> ThemeMode.DARK
-                2 -> ThemeMode.LIGHT
-                else -> ThemeMode.ERROR
+                else -> ThemeMode.LIGHT
             }
         }
 
     fun addSettingChangedHandler(sigHandler: DBusSigHandler<FreedesktopInterface.SettingChanged>) =
-        connection.addSigHandler(FreedesktopInterface.SettingChanged::class.java, sigHandler)
+        connection!!.addSigHandler(FreedesktopInterface.SettingChanged::class.java, sigHandler)
 
     fun removeSettingChangedHandler(sigHandler: DBusSigHandler<FreedesktopInterface.SettingChanged>) =
-        connection.removeSigHandler(FreedesktopInterface.SettingChanged::class.java, sigHandler)
+        connection!!.removeSigHandler(FreedesktopInterface.SettingChanged::class.java, sigHandler)
 
     /**
      * Unpacks a Variant recursively and returns the inner value.

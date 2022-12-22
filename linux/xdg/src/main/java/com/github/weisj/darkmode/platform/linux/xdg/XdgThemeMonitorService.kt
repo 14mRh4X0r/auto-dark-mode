@@ -9,8 +9,8 @@ import org.freedesktop.dbus.interfaces.DBusSigHandler
 class XdgThemeMonitorService : ThemeMonitorService {
     private val freedesktopConnection = FreedesktopConnection()
     private val sigHandler = SigHandler()
-    override val isDarkThemeEnabled: Boolean = freedesktopConnection.theme == ThemeMode.DARK
-    override val isSupported: Boolean = freedesktopConnection.theme != ThemeMode.ERROR
+    override val isDarkThemeEnabled get() = freedesktopConnection.theme == ThemeMode.DARK
+    override val isSupported = freedesktopConnection.theme != ThemeMode.ERROR
     override val isHighContrastEnabled: Boolean = false  // No xdg preference for that available
 
     override fun createEventHandler(callback: () -> Unit): NativePointer? {
@@ -18,7 +18,7 @@ class XdgThemeMonitorService : ThemeMonitorService {
 
         freedesktopConnection.addSettingChangedHandler(sigHandler)
         sigHandler.eventHandler = callback
-        return NativePointer(0L)
+        return NativePointer(-1L)
     }
 
     override fun deleteEventHandler(eventHandle: NativePointer) {

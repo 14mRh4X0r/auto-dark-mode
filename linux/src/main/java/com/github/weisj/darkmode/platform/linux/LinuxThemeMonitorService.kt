@@ -34,9 +34,9 @@ import com.github.weisj.darkmode.platform.linux.xdg.XdgThemeMonitorService
 class LinuxThemeMonitorService : ThemeMonitorService by createCompatibleMonitorService()
 
 private fun createCompatibleMonitorService() : ThemeMonitorService {
-    if (LibraryUtil.isGtk) return GtkThemeMonitorService()
     val xdgThemeMonitorService = XdgThemeMonitorService()
     if (xdgThemeMonitorService.isSupported) return xdgThemeMonitorService
+    if (LibraryUtil.isGtk) return GtkThemeMonitorService()
     Notifications.dispatchNotification(
         message = "This plugin currently only supports desktop environments that either are Gtk based, or support the color-scheme preference on Linux."
     )
